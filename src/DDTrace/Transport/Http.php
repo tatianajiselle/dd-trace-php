@@ -14,11 +14,15 @@ final class Http implements Transport
     // Env variables to configure trace agent. They will be moved to a configuration class once we implement it.
     const AGENT_HOST_ENV = 'DD_AGENT_HOST';
     const TRACE_AGENT_PORT_ENV = 'DD_TRACE_AGENT_PORT';
+    const AGENT_TIMEOUT_ENV = 'DD_AGENT_TIMEOUT';
+    const AGENT_CONNECT_TIMEOUT_ENV = 'DD_AGENT_CONNECT_TIMEOUT';
 
     // Default values for trace agent configuration
     const DEFAULT_AGENT_HOST = 'localhost';
     const DEFAULT_TRACE_AGENT_PORT = '8126';
     const DEFAULT_TRACE_AGENT_PATH = '/v0.3/traces';
+    const DEFAULT_AGENT_CONNECT_TIMEOUT = 100;
+    const DEFAULT_AGENT_TIMEOUT = 500;
 
     /**
      * @var Encoder
@@ -67,6 +71,8 @@ final class Http implements Transport
 
         $this->config = array_merge([
             'endpoint' => $endpoint,
+            'connect_timeout' => getenv(self::AGENT_CONNECT_TIMEOUT_ENV) ?: self::DEFAULT_AGENT_CONNECT_TIMEOUT,
+            'timeout' => getenv(self::AGENT_TIMEOUT_ENV) ?: self::DEFAULT_AGENT_TIMEOUT,
         ], $config);
     }
 
@@ -93,8 +99,8 @@ final class Http implements Transport
         curl_setopt($handle, CURLOPT_POST, true);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $body);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_TIMEOUT_MS, 500);
-        curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, 100);
+        curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout']);
+        curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connect_timeout']);
 
         $curlHeaders = [
             'Content-Type: ' . $this->encoder->getContentType(),
