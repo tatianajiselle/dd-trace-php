@@ -398,6 +398,20 @@ static zend_always_inline zend_bool wrap_and_run(zend_execute_data *execute_data
 }
 
 
+zend_function *fcall_fbc(zend_execute_data *execute_data){
+    zend_op *opline = EX(opline);
+    zend_function *fbc = NULL;
+    zval *fname = opline->op1.zv;
+
+    if (CACHED_PTR(opline->op1.literal->cache_slot)) {
+		return CACHED_PTR(opline->op1.literal->cache_slot);
+	} else if (EXPECTED(zend_hash_quick_find(EG(function_table), Z_STRVAL_P(fname), Z_STRLEN_P(fname)+1, Z_HASH_P(fname), (void **) &fbc)==SUCCESS)) {
+	   return fbc;
+	} else {
+		return NULL;
+	}
+}
+
 
 static zend_always_inline zend_bool get_wrappable_function(zend_execute_data *execute_data, zend_function **fbc_p,
                                                            char const **function_name_p,
@@ -417,9 +431,9 @@ static zend_always_inline zend_bool get_wrappable_function(zend_execute_data *ex
         zend_op *opline = EX(opline);
         zval *fname = opline->op1.zv;
 
-        fbc = EX(function_state).function;
-        function_name = Z_STRVAL_P(opline->op1.zv);
-        function_name_length = Z_STRLEN_P(opline->op1.zv);
+        fbc = fcall_fbc(execute_data);
+        function_name = Z_STRVAL_P(fname);
+        function_name_length = Z_STRLEN_P(fname);
     }
 #else
     fbc = FBC();
