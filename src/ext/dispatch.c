@@ -127,6 +127,7 @@ static void execute_fcall(ddtrace_dispatch_t *dispatch, zend_execute_data *execu
     }
     if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
         zval_ptr_dtor(EG(return_value_ptr_ptr));
+        EG(return_value_ptr_ptr) = NULL;
     }
 
 
@@ -331,7 +332,6 @@ static zend_always_inline zend_bool wrap_and_run(zend_execute_data *execute_data
 
         execute_fcall(dispatch, execute_data, return_value TSRMLS_CC);
 
-
         DD_PRINTF("ETF %0lx", EX(object));
 
         if (return_value != NULL) {
@@ -466,7 +466,8 @@ static int update_opcode_leave(zend_execute_data *execute_data TSRMLS_DC) {
     if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
         zval_ptr_dtor(EG(return_value_ptr_ptr));
     }
-	EG(return_value_ptr_ptr) = &EX(original_return_value);
+	// EG(return_value_ptr_ptr) = &EX(original_return_value);
+    EX(original_return_value) = NULL;
     EG(return_value_ptr_ptr) = NULL;
 
     EG(active_symbol_table) = EX(symbol_table);
@@ -489,18 +490,7 @@ static int update_opcode_leave(zend_execute_data *execute_data TSRMLS_DC) {
     return ZEND_USER_OPCODE_LEAVE;
 }
 
-int ddtrace_wrap_fcall(zend_execute_data *execute_data TSRMLS_DC) {
-    const char *function_name = NULL;
-    uint32_t function_name_length = 0;
-    zend_function *fbc = NULL;
-
-    DD_PRINTF("OPCODE: %s", zend_get_opcode_name(EX(opline)->opcode));
-
-    if (get_wrappable_function(execute_data, &fbc, &function_name, &function_name_length) &&
-        wrap_and_run(execute_data, fbc, function_name, function_name_length TSRMLS_CC)) {
-        return update_opcode_leave(execute_data TSRMLS_CC);
-    }
-
+int default_dispatch(zend_execute_data *execute_data TSRMLS_DC) {
     if (EX(opline)->opcode == ZEND_DO_FCALL_BY_NAME) {
         if (ddtrace_old_fcall_by_name_handler) {
             return ddtrace_old_fcall_by_name_handler(execute_data TSRMLS_CC);
@@ -512,4 +502,22 @@ int ddtrace_wrap_fcall(zend_execute_data *execute_data TSRMLS_DC) {
     }
 
     return ZEND_USER_OPCODE_DISPATCH;
+}
+
+int ddtrace_wrap_fcall(zend_execute_data *execute_data TSRMLS_DC) {
+    const char *function_name = NULL;
+    uint32_t function_name_length = 0;
+    zend_function *fbc = NULL;
+
+    DD_PRINTF("OPCODE: %s", zend_get_opcode_name(EX(opline)->opcode));
+
+    if (!get_wrappable_function(execute_data, &fbc, &function_name, &function_name_length)) {
+        return default_dispatch(execute_data TSRMLS_CC);
+    }
+
+    if (wrap_and_run(execute_data, fbc, function_name, function_name_length TSRMLS_CC)) {
+        return update_opcode_leave(execute_data TSRMLS_CC);
+    }
+
+    return default_dispatch(execute_data TSRMLS_CC);
 }
