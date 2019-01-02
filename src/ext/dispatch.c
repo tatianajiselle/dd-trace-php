@@ -126,7 +126,7 @@ static void execute_fcall(ddtrace_dispatch_t *dispatch, zend_execute_data *execu
     if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
     }
     if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-        zval_ptr_dtor(EG(return_value_ptr_ptr));
+        // zval_ptr_dtor(EG(return_value_ptr_ptr));
         EG(return_value_ptr_ptr) = NULL;
     }
 
@@ -373,7 +373,9 @@ static zend_always_inline zend_bool wrap_and_run(zend_execute_data *execute_data
 
         if (!RETURN_VALUE_USED(opline)) {
             // zval_dtor(return_value);
-            zval_ptr_dtor(EG(return_value_ptr_ptr));
+            if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)){
+                zval_ptr_dtor(EG(return_value_ptr_ptr));
+            }
 
             EG(return_value_ptr_ptr) = NULL;
         }
@@ -478,7 +480,7 @@ static int update_opcode_leave(zend_execute_data *execute_data TSRMLS_DC) {
 	EG(active_op_array) = EX(op_array);
 
     if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-        zval_ptr_dtor(EG(return_value_ptr_ptr));
+        // zval_ptr_dtor(EG(return_value_ptr_ptr));
     }
 	// EG(return_value_ptr_ptr) = &EX(original_return_value);
     EX(original_return_value) = NULL;
