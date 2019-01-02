@@ -23,7 +23,7 @@ final class TracerTest extends Framework\TestCase
     {
         $tracer = Tracer::noop();
         $span = $tracer->startSpan(self::OPERATION_NAME);
-        $this->assertInstanceOf('\DDTrace\NoopSpan', $span);
+        $this->assertInstanceOf('DDTrace\NoopSpan', $span);
     }
 
     public function testCreateSpanSuccessWithExpectedValues()
@@ -81,7 +81,7 @@ final class TracerTest extends Framework\TestCase
 
     public function testInjectThrowsUnsupportedFormatException()
     {
-        $this->expectException('OpenTracing\Exceptions\UnsupportedFormat');
+        $this->expectException('DDTrace\Exceptions\UnsupportedFormat');
         $context = SpanContext::createAsRoot();
         $carrier = [];
 
@@ -102,7 +102,7 @@ final class TracerTest extends Framework\TestCase
 
     public function testExtractThrowsUnsupportedFormatException()
     {
-        $this->expectException('OpenTracing\Exceptions\UnsupportedFormat');
+        $this->expectException('DDTrace\Exceptions\UnsupportedFormat');
         $carrier = [];
         $tracer = new Tracer(new NoopTransport());
         $tracer->extract(self::FORMAT, $carrier);
