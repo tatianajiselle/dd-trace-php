@@ -345,8 +345,16 @@ static zend_always_inline zend_bool wrap_and_run(zend_execute_data *execute_data
 #define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
 
 #if PHP_VERSION_ID < 70000
-        EX_T(opline->result.var).var.ptr = NULL;
-        zval **return_value = &EX_T(opline->result.var).var.ptr;
+        zval **return_value = NULL;
+        zval *rv_ptr = &rv;
+
+        if (RETURN_VALUE_USED(opline)) {
+            EX_T(opline->result.var).var.ptr = NULL;
+            return_value = &EX_T(opline->result.var).var.ptr;
+        } else {
+            return_value = &rv_ptr;
+        }
+
 
         DD_PRINTF("ETF %0lx", EX(object));
         DD_PRINTF("Starting handler for %s#%s", common_scope, function_name);
