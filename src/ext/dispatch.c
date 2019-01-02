@@ -489,7 +489,7 @@ static int update_opcode_leave(zend_execute_data *execute_data TSRMLS_DC) {
     EG(active_symbol_table) = EX(symbol_table);
 
     // EG(This) = EX(current_this);
-	EG(scope) = EX(current_scope);
+	EG(scope) = NULL;
 	EG(called_scope) = EX(current_called_scope);
 	EX(object) = EX(current_object);
 
