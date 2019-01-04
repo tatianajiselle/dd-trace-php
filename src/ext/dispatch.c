@@ -508,7 +508,7 @@ static int update_opcode_leave(zend_execute_data *execute_data TSRMLS_DC) {
 
     EG(active_symbol_table) = EX(symbol_table);
 
-    EG(scope) = EX(current_scope);
+    // EG(scope) = EX(current_scope);
     EX(object) = EX(current_object);
     EX(called_scope) = DECODE_CTOR(EX(called_scope));
 
