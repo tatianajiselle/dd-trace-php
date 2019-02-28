@@ -49,7 +49,7 @@ class PredisIntegration extends AbstractIntegration
 
             $thrown = null;
             try {
-                call_user_func_array([$this, '__construct'], $args);
+                dd_trace_forward_call();
                 PredisIntegration::storeConnectionParams($this, $args);
                 PredisIntegration::setConnectionTags($this, $span);
             } catch (\Exception $e) {
@@ -114,7 +114,7 @@ class PredisIntegration extends AbstractIntegration
             $thrown = null;
             $result = null;
             try {
-                $result = $this->executeRaw($arguments, $error);
+                $result = dd_trace_forward_call();
             } catch (\Exception $ex) {
                 $thrown = $ex;
                 $span->setError($ex);
@@ -144,7 +144,7 @@ class PredisIntegration extends AbstractIntegration
             $result = null;
             $span = $scope->getSpan();
             try {
-                $result = $this->executePipeline($connection, $commands);
+                $result = dd_trace_forward_call();
             } catch (\Exception $ex) {
                 $thrown = $ex;
                 $span->setError($ex);
