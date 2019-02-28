@@ -157,6 +157,10 @@ static void execute_fcall(ddtrace_dispatch_t *dispatch, zval *this, zend_execute
     }
 
     ddtrace_setup_fcall(execute_data, &fci, return_value_ptr TSRMLS_CC);
+
+    //fcc.function_handler = current_fbc;
+    fcc.called_scope = current_fbc->common.scope;
+    //fcc.object = Z_OBJ_P(this);
     zend_call_function(&fci, &fcc TSRMLS_CC);
 
 #if PHP_VERSION_ID < 70000
