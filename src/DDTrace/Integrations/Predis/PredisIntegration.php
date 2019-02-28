@@ -7,7 +7,7 @@ use DDTrace\Integrations\AbstractIntegration;
 use DDTrace\Tag;
 use DDTrace\Type;
 use DDTrace\GlobalTracer;
-use DDTrace\Util\TryCatchFinally;
+use DDTrace\Util\Versions;
 use Predis\Configuration\OptionsInterface;
 use Predis\Pipeline\Pipeline;
 
@@ -74,7 +74,7 @@ class PredisIntegration extends AbstractIntegration
             $span->setTag(Tag::RESOURCE_NAME, 'Predis.Client.connect');
             PredisIntegration::setConnectionTags($this, $span);
 
-            return TryCatchFinally::executePublicMethod($scope, $this, 'connect', []);
+            return include __DIR__ . '/../../try_catch_finally.php';
         });
 
         // public mixed Predis\Client::executeCommand(CommandInterface $command)
@@ -92,7 +92,7 @@ class PredisIntegration extends AbstractIntegration
             $span->setTag(Tag::RESOURCE_NAME, $query);
             PredisIntegration::setConnectionTags($this, $span);
 
-            return TryCatchFinally::executePublicMethod($scope, $this, 'executeCommand', [$command]);
+            return include __DIR__ . '/../../try_catch_finally.php';
         });
 
         // public mixed Predis\Client::executeRaw(array $arguments, bool &$error)
