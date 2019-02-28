@@ -1,6 +1,6 @@
 <?php
+include 'tests/Frameworks/Symfony/Version_4_2/vendor/autoload.php';
 
-namespace DDTrace\Tests;
 
 use Symfony\Component\Process\Process;
 
@@ -113,6 +113,10 @@ class WebServer
         return $this;
     }
 
+    public function process(){
+        return $this->process;
+    }
+
     /**
      * Returns the CLI compatible version of an associative array representing env variables.
      *
@@ -143,3 +147,24 @@ class WebServer
         return implode(' ', $forCli);
     }
 }
+echo "blah" .PHP_EOL;
+$webServer = new WebServer("blah.php", $host = '0.0.0.0', $port = 9876);
+echo "blah" .PHP_EOL;
+$webServer->setInis([
+    'error_log' => __DIR__ . '/error.log'
+]);
+echo "blah" .PHP_EOL;
+$webServer->setEnvs([
+    'DD_TRACE_DEBUG' => 'true',
+]);
+echo "blah" .PHP_EOL;
+$webServer->start();
+echo "blah" .PHP_EOL;
+
+usleep(50000000);
+echo $webServer->process()->getOutput();
+echo $webServer->process()->getErrorOutput();
+$webServer->process()->stop();
+echo $webServer->process()->getOutput();
+echo $webServer->process()->getErrorOutput();
+echo "aall";
