@@ -165,7 +165,8 @@ void ddtrace_forward_call(zend_execute_data *execute_data, zval *return_value TS
 
     setup_fcal_name(execute_data, &fci, &retval TSRMLS_CC);
 
-    func = datadog_current_function(DDTRACE_G(original_execute_data));
+    //func = datadog_current_function(DDTRACE_G(original_execute_data));
+    func = DDTRACE_G(current_fbc);
 
     fci.size = sizeof(fci);
     ALLOC_ZVAL(fci.function_name);
@@ -186,7 +187,7 @@ void ddtrace_forward_call(zend_execute_data *execute_data, zval *return_value TS
     }
 
     if (fci.params) {
-		efree(fci.params);
-	}
+        efree(fci.params);
+    }
 }
 #endif  // PHP 5
