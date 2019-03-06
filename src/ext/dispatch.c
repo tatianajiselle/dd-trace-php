@@ -124,6 +124,7 @@ static void execute_fcall(ddtrace_dispatch_t *dispatch, zval *this, zend_execute
     zend_function *func;
     zend_execute_data *prev_original_execute_data;
 #if PHP_VERSION_ID < 70000
+    zend_executor_globals *executor_globals;
     const char *func_name = "dd_trace_callback";
     func = datadog_current_function(execute_data);
 
@@ -164,6 +165,7 @@ static void execute_fcall(ddtrace_dispatch_t *dispatch, zval *this, zend_execute
     // Move this to closure zval before zend_fcall_info_init()
     fcc.function_handler->common.function_name = func_name;
 
+    executor_globals = (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(executor_globals_id)];
     prev_original_execute_data = DDTRACE_G(original_execute_data);
     DDTRACE_G(original_execute_data) = execute_data;
     zend_call_function(&fci, &fcc TSRMLS_CC);
