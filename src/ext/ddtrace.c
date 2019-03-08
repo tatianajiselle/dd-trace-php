@@ -224,11 +224,12 @@ static PHP_FUNCTION(dd_trace_forward_call) {
         RETURN_BOOL(0);
     }
 
-#if PHP_VERSION_ID < 70000
-    zend_executor_globals *executor_globals = (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(executor_globals_id)];
-    ddtrace_forward_call(executor_globals->current_execute_data, return_value TSRMLS_CC);
-#else
+#if PHP_VERSION_ID >= 70000
     ddtrace_forward_call(execute_data, return_value TSRMLS_CC);
+#elif PHP_VERSION_ID >= 50500
+    ddtrace_forward_call(EG(current_execute_data)->prev_execute_data, return_value TSRMLS_CC);
+#else
+    ddtrace_forward_call(EG(current_execute_data), return_value TSRMLS_CC);
 #endif
 }
 

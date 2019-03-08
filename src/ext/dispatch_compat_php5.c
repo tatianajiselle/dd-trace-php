@@ -152,7 +152,7 @@ void ddtrace_forward_call(zend_execute_data *execute_data, zval *return_value TS
     const char *callback_name;
     zend_function *func;
 
-    prev_ex = !EX(prev_execute_data)->function_state.function->common.function_name ? EX(prev_execute_data)->prev_execute_data : EX(prev_execute_data);
+    prev_ex = !execute_data->function_state.function->common.function_name ? execute_data->prev_execute_data : execute_data;
     callback_name = !prev_ex ? NULL : prev_ex->function_state.function->common.function_name;
 
     if (!DDTRACE_G(original_execute_data)
@@ -163,10 +163,11 @@ void ddtrace_forward_call(zend_execute_data *execute_data, zval *return_value TS
         return;
     }
 
-    setup_fcal_name(execute_data, &fci, &retval TSRMLS_CC);
+    //setup_fcal_name(execute_data, &fci, &retval TSRMLS_CC);
+    fci.retval_ptr_ptr = retval;
 
-    //func = datadog_current_function(DDTRACE_G(original_execute_data));
-    func = DDTRACE_G(current_fbc);
+    func = datadog_current_function(DDTRACE_G(original_execute_data));
+    //func = DDTRACE_G(current_fbc);
 
     fci.size = sizeof(fci);
     ALLOC_ZVAL(fci.function_name);
