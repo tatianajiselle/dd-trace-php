@@ -227,7 +227,8 @@ static PHP_FUNCTION(dd_trace_forward_call) {
 #if PHP_VERSION_ID >= 70000
     ddtrace_forward_call(execute_data, return_value TSRMLS_CC);
 #elif PHP_VERSION_ID >= 50500
-    ddtrace_forward_call(EG(current_execute_data)->prev_execute_data, return_value TSRMLS_CC);
+    //ddtrace_forward_call(zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC), return_value TSRMLS_CC);
+    ddtrace_forward_call(EG(current_execute_data)/*->prev_execute_data*/, return_value TSRMLS_CC);
 #else
     ddtrace_forward_call(EG(current_execute_data), return_value TSRMLS_CC);
 #endif
