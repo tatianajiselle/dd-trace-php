@@ -462,23 +462,26 @@ int default_dispatch(zend_execute_data *execute_data TSRMLS_DC) {
 int ddtrace_wrap_fcall(zend_execute_data *execute_data TSRMLS_DC) {
     const char *function_name = NULL;
     uint32_t function_name_length = 0;
+    zend_execute_data *ex;
     DD_PRINTF("OPCODE: %s", zend_get_opcode_name(EX(opline)->opcode));
 
-    zend_function *current_fbc = get_current_fbc(execute_data);
+    zend_function *current_fbc = get_current_fbc(ex);
 
-    if (!is_function_wrappable(execute_data, current_fbc, &function_name, &function_name_length)) {
-        return default_dispatch(execute_data TSRMLS_CC);
+    ex = EG(current_execute_data)->prev_execute_data;
+
+    if (!is_function_wrappable(ex, current_fbc, &function_name, &function_name_length)) {
+        return default_dispatch(ex TSRMLS_CC);
     }
     zend_function *previous_fbc = DDTRACE_G(current_fbc);
     DDTRACE_G(current_fbc) = current_fbc;
 
-    zend_bool wrapped = wrap_and_run(execute_data, function_name, function_name_length TSRMLS_CC);
+    zend_bool wrapped = wrap_and_run(ex, function_name, function_name_length TSRMLS_CC);
 
     DDTRACE_G(current_fbc) = previous_fbc;
     if (wrapped) {
-        return update_opcode_leave(execute_data TSRMLS_CC);
+        return update_opcode_leave(ex TSRMLS_CC);
     } else {
-        return default_dispatch(execute_data TSRMLS_CC);
+        return default_dispatch(ex TSRMLS_CC);
     }
 }
 
