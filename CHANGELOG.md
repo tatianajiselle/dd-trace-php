@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file - [read more
 
 ## [Unreleased]
 
+### Changed
+- Request init hook module blacklist now avoids miss matching partial matches #372
+
 ## [0.16.0]
 
 ### Changed
